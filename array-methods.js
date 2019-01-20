@@ -1,14 +1,24 @@
 var dataset = require('./dataset.json');
+let bankBalances = dataset.bankBalances;
 
 /*
   create an array with accounts from bankBalances that are
   greater than 100000
   assign the resulting new array to `hundredThousandairs`
 */
-var hundredThousandairs = null;
+const getAmounts = (i) => {
+  return i.amount > 100000;
+}
+
+var hundredThousandairs = bankBalances.filter(getAmounts);
 
 // set sumOfBankBalances to be the sum of all value held at `amount` for each bank object
-var sumOfBankBalances = null;
+
+const getSums = (add, curr) => {
+  return add + parseInt(curr.amount)
+};
+
+var sumOfBankBalances = bankBalances.reduce(getSums, 0);
 
 /*
   from each of the following states:
@@ -21,7 +31,17 @@ var sumOfBankBalances = null;
   take each `amount` and add 18.9% interest to it rounded to the nearest dollar 
   and then sum it all up into one value saved to `sumOfInterests`
  */
-var sumOfInterests = null;
+
+const filteredStates = (i) => {
+  let states = ['DE', 'WI', 'OH', 'IL', 'WY', 'GA'];
+  return states.includes(i.state)
+};
+
+const getSomeInterest = (add, curr) => {
+  return add + Math.round(parseInt(curr.amount) * 0.189);
+};
+
+var sumOfInterests = bankBalances.filter(filteredStates).reduce(getSomeInterest, 0)
 
 /*
   aggregate the sum of bankBalance amounts
@@ -39,7 +59,16 @@ var sumOfInterests = null;
     round this number to the nearest dollar before moving on.
   )
  */
-var stateSums = null;
+const aggregatedSums = (acct, curr) => {
+  if (acct.hasOwnProperty(curr.state)) {
+    acct[curr.state] += Math.round(parseInt(curr.amount));
+  } else {
+    acct[curr.state] = Math.round(parseInt(curr.amount));
+  }
+  return acct;
+}
+
+var stateSums = bankBalances.reduce(aggregatedSums, {});
 
 /*
   for all states *NOT* in the following states:
@@ -58,7 +87,13 @@ var stateSums = null;
     round this number to the nearest dollar before moving on.
   )
  */
-var sumOfHighInterests = null;
+
+var sumOfHighInterests = bankBalances.filter(i => {
+  return !['WI', 'IL', 'WY', 'OH', 'GA', 'DE'].includes(i.state)
+}).reduce((acct, curr) => {
+  let interest = Math.round(stateSums[curr] * 0.189);
+})
+
 
 /*
   set `lowerSumStates` to be an array of two letter state
@@ -108,13 +143,13 @@ var anyStatesInHigherStateSum = null;
 
 
 module.exports = {
-  hundredThousandairs : hundredThousandairs,
-  sumOfBankBalances : sumOfBankBalances,
-  sumOfInterests : sumOfInterests,
-  sumOfHighInterests : sumOfHighInterests,
-  stateSums : stateSums,
-  lowerSumStates : lowerSumStates,
-  higherStateSums : higherStateSums,
-  areStatesInHigherStateSum : areStatesInHigherStateSum,
-  anyStatesInHigherStateSum : anyStatesInHigherStateSum
+  hundredThousandairs: hundredThousandairs,
+  sumOfBankBalances: sumOfBankBalances,
+  sumOfInterests: sumOfInterests,
+  sumOfHighInterests: sumOfHighInterests,
+  stateSums: stateSums,
+  lowerSumStates: lowerSumStates,
+  higherStateSums: higherStateSums,
+  areStatesInHigherStateSum: areStatesInHigherStateSum,
+  anyStatesInHigherStateSum: anyStatesInHigherStateSum
 };
