@@ -31,10 +31,9 @@ var sumOfBankBalances = bankBalances.reduce(getSums, 0);
   take each `amount` and add 18.9% interest to it rounded to the nearest dollar 
   and then sum it all up into one value saved to `sumOfInterests`
  */
-
+let states = ['DE', 'WI', 'OH', 'IL', 'WY', 'GA']
 const filteredStates = (i) => {
-  let states = ['DE', 'WI', 'OH', 'IL', 'WY', 'GA'];
-  return states.includes(i.state)
+  return states.includes(i.state);
 };
 
 const getSomeInterest = (add, curr) => {
@@ -87,26 +86,50 @@ var stateSums = bankBalances.reduce(aggregatedSums, {});
     round this number to the nearest dollar before moving on.
   )
  */
+let filterStates = (states, acct) => {
+  if (!['DE', 'WI', 'OH', 'IL', 'WY', 'GA'].includes(acct.state)) {
+    !states.includes(acct.state) ? states.push(acct.state) : states;
+  }
+  return states;
+}; //filters out unwanted states & pushes the rest into an array
 
-var sumOfHighInterests = bankBalances.filter(i => {
-  return !['WI', 'IL', 'WY', 'OH', 'GA', 'DE'].includes(i.state)
-}).reduce((acct, curr) => {
-  let interest = Math.round(stateSums[curr] * 0.189);
-})
+let higherInt = (int, state) => {
+  let sum = Math.round(stateSums[state] * 0.189);
+
+  sum > 50000 ? int += sum : int;
+
+  return int;
+} //calculates the summed interest of values over 50k
 
 
+var sumOfHighInterests = bankBalances.reduce(filterStates, []).reduce(higherInt, 0);
 /*
   set `lowerSumStates` to be an array of two letter state
   abbreviations of each state where the sum of amounts
   in the state is less than 1,000,000
  */
-var lowerSumStates = null;
+const abbreviations = (states, acct) => {
+  let state = acct.state;
+  !states.includes(state) ? states.push(state) : states;
+  return states;
+}; // creates array of two-letter state abbreviations
+
+var lowerSumStates = bankBalances.reduce(abbreviations, []).filter(state => {
+  return stateSums[state] < 1000000
+});
 
 /*
   aggregate the sum of each state into one hash table
   `higherStateSums` should be the sum of all states with totals greater than 1,000,000
  */
-var higherStateSums = null;
+
+var higherStateSums = bankBalances.reduce(abbreviations, []).reduce((add, curr) => {
+  if (stateSums[curr] > 1000000) {
+    return add += stateSums[curr];
+  } else {
+    return add;
+  }
+}, 0);
 
 /*
   from each of the following states:
@@ -123,7 +146,9 @@ var higherStateSums = null;
   if true set `areStatesInHigherStateSum` to `true`
   otherwise set it to `false`
  */
-var areStatesInHigherStateSum = null;
+var areStatesInHigherStateSum = states.every(amt => {
+  return stateSums[amt] > 2550000
+});
 
 /*
   Stretch Goal && Final Boss
@@ -139,7 +164,9 @@ var areStatesInHigherStateSum = null;
   have a sum of account values greater than 2,550,000
   otherwise set it to be `false`
  */
-var anyStatesInHigherStateSum = null;
+var anyStatesInHigherStateSum = states.some(amt => {
+  return stateSums[amt] > 2550000
+});
 
 
 module.exports = {
